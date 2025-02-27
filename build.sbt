@@ -26,5 +26,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion, // Alternative JSON support
   "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % Test,
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
-  "org.scalatest" %% "scalatest" % "3.2.18" % Test
+  "org.scalatest" %% "scalatest" % "3.2.18" % Test,
+  "com.typesafe.slick" %% "slick" % "3.4.1",
+  "com.typesafe.slick" %% "slick-hikaricp" % "3.4.1",
+  "org.postgresql" % "postgresql" % "42.7.1",
+  "com.typesafe" % "config" % "1.4.3"
 )

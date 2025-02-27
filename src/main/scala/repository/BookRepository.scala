@@ -1,45 +1,38 @@
 package repository
 
-import models.Book
-import scala.collection.mutable
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import models.{Book, BookTable}
+import scala.concurrent.{ExecutionContext, Future}
+import slick.jdbc.PostgresProfile.api._
+import db.DatabaseConnection.db
 
 object BookRepository {
-    private val books: mutable.Map[Int, Book] = mutable.Map()
+  private val books = TableQuery[BookTable]
 
-    def getAllBooks: Future[List[Book]] = Future {
-        books.values.toList
+  def getAllBooks(implicit ec: ExecutionContext): Future[List[Book]] = {
+    db.run(books.result).map(_.toList)
+  }
+
+  def getBook(id: Int)(implicit ec: ExecutionContext): Future[Option[Book]] = {
+    db.run(books.filter(_.id === id).result.headOption)
+  }
+
+  def getBookByTitle(title: String)(implicit ec: ExecutionContext): Future[Option[Book]] = {
+    db.run(books.filter(_.title === title).result.headOption)
+  }
+
+  def createBook(book: Book)(implicit ec: ExecutionContext): Future[Book] = {
+    db.run(books += book).map(_ => book)
+  }
+
+  def deleteBook(id: Int)(implicit ec: ExecutionContext): Future[Boolean] = {
+    db.run(books.filter(_.id === id).delete).map(_ > 0)
+  }
+
+  def updateBook(id: Int, book: Book)(implicit ec: ExecutionContext): Future[Option[Book]] = {
+    val updateQuery = books.filter(_.id === id).update(book)
+    db.run(updateQuery).flatMap { rowsAffected =>
+      if (rowsAffected > 0) Future.successful(Some(book))
+      else Future.successful(None)
     }
-
-    def getBook(id: Int): Future[Option[Book]] = Future {
-        books.get(id)
-    }
-
-    def getBookByTitle(title: String): Future[Option[Book]] = Future {
-        books.values.find(_.title == title)
-    }
-
-    def createBook(book: Book): Future[Book] = Future {
-        // Check if the book already exists
-        if (books.values.exists(_.title == book.title)) {
-            throw new Exception("Book already exists")
-        }
-
-        books += (book.id -> book)
-        book
-    }
-
-    def deleteBook(id: Int): Future[Boolean] = Future {
-        books.remove(id).isDefined
-    }
-
-    def updateBook(id: Int, book: Book): Future[Option[Book]] = Future {
-        books.get(id) match {
-            case Some(_) =>
-                books.update(id, book)
-                Some(book)
-            case None => None
-        }
-    }
+  }
 }
