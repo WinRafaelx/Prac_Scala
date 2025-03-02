@@ -1,12 +1,13 @@
 package repository
 
-import models.{User, UserTable}
+import models.User
+import db.tables.UserTable
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.PostgresProfile.api._
 import db.DatabaseConnection.db
 
 object UserRepository {
-  private val users = TableQuery[UserTable]
+  private val users = UserTable.table
 
   def getAllUsers(implicit ec: ExecutionContext): Future[List[User]] = {
     db.run(users.result).map(_.toList)
@@ -17,7 +18,8 @@ object UserRepository {
   }
 
   def createUser(user: User)(implicit ec: ExecutionContext): Future[User] = {
-    db.run(users += user).map(_ => user)
+    val insertQuery = users returning users.map(_.id) into ((user, id) => user.copy(id = id))
+    db.run(insertQuery += user)
   }
 
   def deleteUser(id: Int)(implicit ec: ExecutionContext): Future[Boolean] = {
@@ -25,10 +27,11 @@ object UserRepository {
   }
 
   def updateUser(id: Int, user: User)(implicit ec: ExecutionContext): Future[Option[User]] = {
-    val updateQuery = users.filter(_.id === id).update(user)
-    db.run(updateQuery).flatMap { rowsAffected =>
-      if (rowsAffected > 0) Future.successful(Some(user))
-      else Future.successful(None)
+    val updateUser = user.copy(id = id)
+    val updateQuery = users.filter(_.id === id).update(updateUser)
+    db.run(updateQuery).flatMap { 
+      case 0 => Future.successful(None)
+      case _ => Future.successful(Some(updateUser))
     }
   }
 

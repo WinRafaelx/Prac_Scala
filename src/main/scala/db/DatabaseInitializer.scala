@@ -1,28 +1,28 @@
 package db
 
-import models.{BookTable, UserTable}
+import db.tables.{BookTable, UserTable}
 import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{ExecutionContext, Future}
 
 object DatabaseInitializer {
-  private val users = TableQuery[UserTable]
-  private val books = TableQuery[BookTable]
+  private val books = BookTable.table
+  private val users = UserTable.table
 
   def initDatabase()(implicit ec: ExecutionContext): Future[Unit] = {
     val db = DatabaseConnection.db
     
-    println("Checking database tables...")
+    println("Initializing database schemas...")
     
-    // Create schemas with better error handling
-    val setup = DBIO.seq(
-      // Create tables if they don't exist
-      sqlu"CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))",
-      sqlu"CREATE TABLE IF NOT EXISTS books (id INTEGER PRIMARY KEY, title VARCHAR(255), author VARCHAR(255))"
+    val createSchemas = DBIO.seq(
+      books.schema.createIfNotExists,
+      users.schema.createIfNotExists
     ).transactionally
 
-    db.run(setup).recoverWith { case ex =>
-      println(s"Error during table creation: ${ex.getMessage}")
-      Future.failed(ex)
+    db.run(createSchemas).map { _ =>
+      println("Database schemas created successfully")
+    }.recover { case ex =>
+      println(s"Failed to create database schemas: ${ex.getMessage}")
+      throw ex
     }
   }
 }

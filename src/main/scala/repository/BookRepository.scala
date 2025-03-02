@@ -1,12 +1,13 @@
 package repository
 
-import models.{Book, BookTable}
+import models.Book
+import db.tables.BookTable
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.PostgresProfile.api._
 import db.DatabaseConnection.db
 
 object BookRepository {
-  private val books = TableQuery[BookTable]
+  private val books = BookTable.table
 
   def getAllBooks(implicit ec: ExecutionContext): Future[List[Book]] = {
     db.run(books.result).map(_.toList)
@@ -21,7 +22,8 @@ object BookRepository {
   }
 
   def createBook(book: Book)(implicit ec: ExecutionContext): Future[Book] = {
-    db.run(books += book).map(_ => book)
+    val insertQuery = books returning books.map(_.id) into ((book, id) => book.copy(id = id))
+    db.run(insertQuery += book)
   }
 
   def deleteBook(id: Int)(implicit ec: ExecutionContext): Future[Boolean] = {
@@ -29,10 +31,11 @@ object BookRepository {
   }
 
   def updateBook(id: Int, book: Book)(implicit ec: ExecutionContext): Future[Option[Book]] = {
-    val updateQuery = books.filter(_.id === id).update(book)
-    db.run(updateQuery).flatMap { rowsAffected =>
-      if (rowsAffected > 0) Future.successful(Some(book))
-      else Future.successful(None)
+    val updateBook = book.copy(id = id)
+    val updateQuery = books.filter(_.id === id).update(updateBook)
+    db.run(updateQuery).flatMap { 
+      case 0 => Future.successful(None)
+      case _ => Future.successful(Some(updateBook))
     }
   }
 }
