@@ -20,7 +20,7 @@ object AuthRoutes {
           post {
             entity(as[RegisterRequest]) { request =>
               val hashedPassword = request.password.bcrypt
-              val user = models.User(0, request.name, request.email, hashedPassword)
+              val user = models.User(None, request.name, request.email, hashedPassword)
               
               onComplete(UserRepository.createUser(user)) {
                 case Success(createdUser) => complete(StatusCodes.Created)

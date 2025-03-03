@@ -1,3 +1,3 @@
 package models
 
-case class Book(id: Int, title: String, author: String)
+case class Book(id: Option[Int], title: String, author: String)

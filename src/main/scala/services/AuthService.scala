@@ -18,6 +18,12 @@ object JwtService {
     JwtCirce.encode(claim, secretKey, algorithm)
   }
 
+  // Alternative method that accepts Option[Int]
+  def createToken(userIdOpt: Option[Int], email: String): String = {
+    val userId = userIdOpt.getOrElse(0)
+    createToken(userId, email)
+  }
+
   def validateToken(token: String): Try[JwtClaim] = {
     JwtCirce.decode(token, secretKey, Seq(algorithm))
   }

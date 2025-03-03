@@ -22,7 +22,12 @@ object BookRepository {
   }
 
   def createBook(book: Book)(implicit ec: ExecutionContext): Future[Book] = {
-    val insertQuery = books returning books.map(_.id) into ((book, id) => book.copy(id = id))
+    // Check if id is already set
+    if (book.id.isDefined) throw new IllegalArgumentException("Book id must not be set")
+
+    val insertQuery = books returning books.map(_.id) into { (book, id) => 
+      book.copy(id = Some(id))
+    }
     db.run(insertQuery += book)
   }
 
@@ -31,7 +36,7 @@ object BookRepository {
   }
 
   def updateBook(id: Int, book: Book)(implicit ec: ExecutionContext): Future[Option[Book]] = {
-    val updateBook = book.copy(id = id)
+    val updateBook = book.copy(id = Some(id))
     val updateQuery = books.filter(_.id === id).update(updateBook)
     db.run(updateQuery).flatMap { 
       case 0 => Future.successful(None)
