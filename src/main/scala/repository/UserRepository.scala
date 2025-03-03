@@ -26,6 +26,11 @@ object UserRepository {
     db.run(users.filter(_.id === id).delete).map(_ > 0)
   }
 
+  // Add this method to your existing UserRepository object
+  def findByEmail(email: String)(implicit ec: ExecutionContext): Future[Option[User]] = {
+    db.run(users.filter(_.email === email).result.headOption)
+  }
+
   def updateUser(id: Int, user: User)(implicit ec: ExecutionContext): Future[Option[User]] = {
     val updateUser = user.copy(id = id)
     val updateQuery = users.filter(_.id === id).update(updateUser)

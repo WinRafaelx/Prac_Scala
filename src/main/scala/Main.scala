@@ -3,7 +3,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
-import routes.{UserRoutes, BookRoutes}
+import routes.{UserRoutes, BookRoutes, AuthRoutes}
 import db.DatabaseInitializer
 import scala.concurrent.{ExecutionContextExecutor, Future, Await}
 import scala.concurrent.duration._
@@ -15,7 +15,7 @@ object Main {
     implicit val system: ActorSystem[Nothing] = ActorSystem[Nothing](Behaviors.empty, "AkkaHttpApi")
     implicit val executionContext: ExecutionContextExecutor = system.executionContext
 
-    val routes: Route = UserRoutes.routes ~ BookRoutes.routes
+    val routes: Route = UserRoutes.routes ~ BookRoutes.routes ~ AuthRoutes.routes
 
     println("Initializing database...")
     Try {

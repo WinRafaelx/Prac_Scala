@@ -30,5 +30,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "3.4.1",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.4.1",
   "org.postgresql" % "postgresql" % "42.7.1",
-  "com.typesafe" % "config" % "1.4.3"
+  "com.typesafe" % "config" % "1.4.3",
+  "com.github.jwt-scala" %% "jwt-core" % "9.4.6",
+  "com.github.jwt-scala" %% "jwt-circe" % "9.4.6",
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0"  // For password hashing
 )
