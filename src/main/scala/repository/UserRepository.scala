@@ -7,7 +7,7 @@ import slick.jdbc.PostgresProfile.api._
 import db.DatabaseConnection.db
 import org.slf4j.LoggerFactory
 
-object UserRepository {
+object UserRepository extends UserRepositoryTrait {
   private val users = UserTable.table
   private val logger = LoggerFactory.getLogger(this.getClass)
 
