@@ -5,6 +5,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import routes.{AuthRoutes, UserRoutes, BookRoutes}
 import services.{JwtService, AuthService}
+import directives.AuthDirectives
 import repository.UserRepository
 import db.DatabaseInitializer
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future, Await}
@@ -20,11 +21,13 @@ object Main {
     // Initialize services
     val jwtService = JwtService()
     val authService = AuthService(UserRepository, jwtService)
+    val authDirectives = AuthDirectives(authService)
     
     // Initialize routes
     val authRoutes = AuthRoutes(authService).routes
-    val routes: Route = authRoutes ~ BookRoutes.routes
-
+    val bookRoutes = BookRoutes(authDirectives).routes
+    val combinedRoutes: Route = authRoutes ~ bookRoutes 
+    
     println("Initializing database...")
     Try {
       // Wait for database initialization to complete
@@ -32,7 +35,7 @@ object Main {
     } match {
       case Success(_) =>
         println("Database initialized successfully")
-        startServer(routes)
+        startServer(combinedRoutes)
       case Failure(ex) =>
         println(s"Failed to initialize database: ${ex.getMessage}")
         ex.printStackTrace()

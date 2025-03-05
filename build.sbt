@@ -33,5 +33,6 @@ libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.4.3",
   "com.github.jwt-scala" %% "jwt-core" % "9.4.6",
   "com.github.jwt-scala" %% "jwt-circe" % "9.4.6",
-  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0"  // For password hashing
+  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",  // For password hashing
+  "io.github.cdimascio" % "dotenv-java" % "2.3.2" // For loading .env files
 )

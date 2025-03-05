@@ -3,8 +3,9 @@ package services
 import pdi.jwt.{JwtAlgorithm, JwtCirce, JwtClaim}
 import java.time.Clock
 import scala.util.Try
+import config.Environment
 
-class JwtService(secretKey: String) {
+class JwtService(secretKey: String, expirationSeconds: Int = 3600) {
   private val algorithm = JwtAlgorithm.HS256
   implicit val clock: Clock = Clock.systemUTC()
 
@@ -12,7 +13,7 @@ class JwtService(secretKey: String) {
     val id = userId.getOrElse(0)
     val claim = JwtClaim(
       content = s"""{"user_id":$id,"email":"$email"}""",
-      expiration = Some(clock.instant().plusSeconds(3600).getEpochSecond), // 1 hour
+      expiration = Some(clock.instant().plusSeconds(expirationSeconds).getEpochSecond), 
       issuedAt = Some(clock.instant().getEpochSecond)
     )
     JwtCirce.encode(claim, secretKey, algorithm)
@@ -24,9 +25,11 @@ class JwtService(secretKey: String) {
 }
 
 object JwtService {
-  // For production, fetch from environment variable or config
-  private val defaultSecretKey = "your-256-bit-secret" 
+  // Get JWT secret from environment or .env file
+  private val secretKey = Environment.getRequired("JWT_SECRET_KEY")
+  private val expiration = Environment.getInt("JWT_EXPIRATION", 3600)
   
-  def apply(): JwtService = new JwtService(defaultSecretKey)
+  def apply(): JwtService = new JwtService(secretKey, expiration)
   def apply(secretKey: String): JwtService = new JwtService(secretKey)
+  def apply(secretKey: String, expiration: Int): JwtService = new JwtService(secretKey, expiration)
 }
