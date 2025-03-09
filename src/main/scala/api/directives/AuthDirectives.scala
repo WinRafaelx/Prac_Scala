@@ -1,4 +1,4 @@
-package directives
+package api.directives
 
 import akka.http.scaladsl.server.Directive1
 import akka.http.scaladsl.server.Directives._

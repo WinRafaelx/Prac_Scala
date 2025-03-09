@@ -1,16 +1,12 @@
 package services
 
-import models.{LoginRequest, LoginResponse, RegisterRequest, User}
-import repository.UserRepositoryTrait
+import api.models.{LoginRequest, LoginResponse, RegisterRequest, User}
+import repositories.UserRepositoryTrait
 import com.github.t3hnar.bcrypt._
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthService(userRepository: UserRepositoryTrait, jwtService: JwtService) {
   
-  /**
-   * Register a new user and generate authentication token
-   * @return Future with token and user data
-   */
   def register(request: RegisterRequest)(implicit ec: ExecutionContext): Future[Either[String, (String, User)]] = {
     val hashedPassword = request.password.bcrypt
     val newUser = User(None, request.name, request.email, hashedPassword)
@@ -23,10 +19,6 @@ class AuthService(userRepository: UserRepositoryTrait, jwtService: JwtService) {
     }
   }
   
-  /**
-   * Authenticate user and generate token
-   * @return Future with token if authentication succeeds
-   */
   def login(request: LoginRequest)(implicit ec: ExecutionContext): Future[Either[String, String]] = {
     userRepository.findByEmail(request.email).map {
       case Some(user) if request.password.isBcrypted(user.password) =>
@@ -41,10 +33,6 @@ class AuthService(userRepository: UserRepositoryTrait, jwtService: JwtService) {
     }
   }
   
-  /**
-   * Validate a JWT token
-   * @return Future with user ID if token is valid
-   */
   def validateToken(token: String)(implicit ec: ExecutionContext): Future[Option[Int]] = {
     Future.successful {
       jwtService.validateToken(token).toOption.flatMap { claim =>

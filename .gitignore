@@ -1,3 +1,7 @@
 /.bsp/
 target/
 .env
+.metals
+.vscode
+project
+.bloop

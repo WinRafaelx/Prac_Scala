@@ -1,6 +1,6 @@
-package repository
+package repositories
 
-import models.User
+import api.models.User
 import scala.concurrent.{ExecutionContext, Future}
 
 trait UserRepositoryTrait {

@@ -1,6 +1,6 @@
 package services
 
-import repository.{UserRepository, BookRepository}
+import repositories.{UserRepository}
 import config.Environment
 
 /**
