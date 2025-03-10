@@ -6,7 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import api.routes.{AuthRoutes}
 import services.{JwtService, AuthService}
 import api.directives.AuthDirectives
-import repositories.UserRepository
+import repositories.UserAuthRepository
 import db.DatabaseInitializer
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future, Await}
 import scala.concurrent.duration._
@@ -20,7 +20,7 @@ object Main {
 
     // Initialize services
     val jwtService = JwtService()
-    val authService = AuthService(UserRepository, jwtService)
+    val authService = AuthService(UserAuthRepository, jwtService)
     val authDirectives = AuthDirectives(authService)
     
     // Initialize routes

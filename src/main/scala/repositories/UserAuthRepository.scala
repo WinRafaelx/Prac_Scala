@@ -10,7 +10,7 @@ import java.sql.Timestamp
 import java.time.Instant
 import api.models.User
 
-object UserRepository extends UserRepositoryTrait {
+object UserAuthRepository extends UserAuthRepositoryTrait {
   private val users = UserAuthTable.table
   private val logger = LoggerFactory.getLogger(this.getClass)
 
@@ -121,70 +121,47 @@ object UserRepository extends UserRepositoryTrait {
       }
   }
 
-  /** Update user details */
-  def updateUser(id: Int, user: User)(implicit
-      ec: ExecutionContext
-  ): Future[Option[User]] = {
-    getUser(id).flatMap {
-      case Some(existingUser) =>
-        val userAuth = toUserAuth(user.copy(id = existingUser.id))
-        // Update all fields except id
-        val updateAction = users
-          .filter(_.id === userAuth.id)
-          .map(u => (u.email, u.passwordHash, u.phone, u.role))
-          .update(
-            (
-              userAuth.email,
-              userAuth.passwordHash,
-              userAuth.phone,
-              userAuth.role
+  def updateUser(
+      id: Int,
+      email: Option[String] = None,
+      passwordHash: Option[String] = None,
+      phone: Option[String] = None,
+      role: Option[String] = None
+  )(implicit ec: ExecutionContext): Future[Option[User]] = {
+
+    // First get all users to find one matching our ID conversion logic
+    db.run(users.result).flatMap { allUsers =>
+      // Find the UserAuth with matching converted ID
+      val matchingUserOpt = allUsers.find(u => u.id.hashCode.abs % Int.MaxValue == id)
+      
+      matchingUserOpt match {
+        case Some(userAuth) =>
+          val query = users
+            .filter(_.id === userAuth.id) // Use the actual UUID
+            .map(u => (u.email, u.passwordHash, u.phone, u.role))
+            .update(
+              (
+                email.getOrElse(userAuth.email),
+                passwordHash.getOrElse(userAuth.passwordHash),
+                phone.orElse(userAuth.phone), // Handle nullable field
+                role.getOrElse(userAuth.role)
+              )
             )
-          )
 
-        db.run(updateAction)
-          .flatMap {
-            case 0 => Future.successful(None) // No rows affected
-            case _ => findByEmail(userAuth.email) // Fetch updated user
-          }
-          .recoverWith { case e =>
-            logger.error(s"Failed to update user $id", e)
-            Future.failed(e)
-          }
-      case None =>
-        Future.successful(None)
-    }
-  }
+          db.run(query)
+            .flatMap {
+              case 0 => Future.successful(None) // No rows affected
+              case _ => findByEmail(email.getOrElse(userAuth.email))
+            }
+            .recoverWith { case e =>
+              logger.error(s"Failed to update user $id", e)
+              Future.failed(e)
+            }
 
-  /** Update user's email */
-  def updateUserEmail(id: Int, email: String)(implicit
-      ec: ExecutionContext
-  ): Future[Option[User]] = {
-    getUser(id).flatMap {
-      case Some(existingUser) =>
-        val userAuth = toUserAuth(existingUser)
-        val query =
-          users.filter(_.id === userAuth.id).map(_.email).update(email)
-
-        db.run(query)
-          .flatMap {
-            case 0 => Future.successful(None) // User not found
-            case _ => findByEmail(email) // Return updated user
-          }
-          .recoverWith { case e =>
-            logger.error(s"Failed to update email for user $id", e)
-            Future.failed(e)
-          }
-      case None =>
-        Future.successful(None)
-    }
-  }
-
-  /** Count total users */
-  def count(implicit ec: ExecutionContext): Future[Int] = {
-    db.run(users.length.result)
-      .recoverWith { case e =>
-        logger.error("Failed to count users", e)
-        Future.failed(e)
+        case None =>
+          Future.successful(None)
       }
+    }
   }
+
 }

@@ -1,17 +1,17 @@
 package services
 
 import api.models.{LoginRequest, LoginResponse, RegisterRequest, User}
-import repositories.UserRepositoryTrait
+import repositories.UserAuthRepositoryTrait
 import com.github.t3hnar.bcrypt._
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthService(userRepository: UserRepositoryTrait, jwtService: JwtService) {
+class AuthService(UserAuthRepository: UserAuthRepositoryTrait, jwtService: JwtService) {
   
   def register(request: RegisterRequest)(implicit ec: ExecutionContext): Future[Either[String, (String, User)]] = {
     val hashedPassword = request.password.bcrypt
     val newUser = User(None, request.name, request.email, hashedPassword)
     
-    userRepository.createUser(newUser).map { createdUser =>
+    UserAuthRepository.createUser(newUser).map { createdUser =>
       val token = jwtService.createToken(createdUser.id, createdUser.email)
       Right((token, createdUser))
     }.recover {
@@ -20,7 +20,7 @@ class AuthService(userRepository: UserRepositoryTrait, jwtService: JwtService) {
   }
   
   def login(request: LoginRequest)(implicit ec: ExecutionContext): Future[Either[String, String]] = {
-    userRepository.findByEmail(request.email).map {
+    UserAuthRepository.findByEmail(request.email).map {
       case Some(user) if request.password.isBcrypted(user.password) =>
         val token = jwtService.createToken(user.id, user.email)
         Right(token)
@@ -50,6 +50,6 @@ class AuthService(userRepository: UserRepositoryTrait, jwtService: JwtService) {
 }
 
 object AuthService {
-  def apply(userRepository: UserRepositoryTrait, jwtService: JwtService): AuthService = 
-    new AuthService(userRepository, jwtService)
+  def apply(UserAuthRepository: UserAuthRepositoryTrait, jwtService: JwtService): AuthService = 
+    new AuthService(UserAuthRepository, jwtService)
 }
