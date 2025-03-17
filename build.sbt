@@ -11,28 +11,73 @@ lazy val root = (project in file("."))
     libraryDependencies += munit % Test
   )
 
-// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
-
+// Versions
 val AkkaVersion = "2.8.0"
 val AkkaHttpVersion = "10.5.0"
+val CirceVersion = "0.14.6"
+val SlickVersion = "3.4.1"
+val JwtVersion = "9.4.6"
 
+// =============================
+// ✅ Akka Dependencies
+// =============================
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
   "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
   "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
-  "de.heikoseeberger" %% "akka-http-circe" % "1.39.2",  // JSON support
-  "io.circe" %% "circe-generic" % "0.14.6",
-  "io.circe" %% "circe-parser" % "0.14.6",
-  "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion, // Alternative JSON support
   "com.typesafe.akka" %% "akka-http-testkit" % AkkaHttpVersion % Test,
-  "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
-  "org.scalatest" %% "scalatest" % "3.2.18" % Test,
-  "com.typesafe.slick" %% "slick" % "3.4.1",
-  "com.typesafe.slick" %% "slick-hikaricp" % "3.4.1",
-  "org.postgresql" % "postgresql" % "42.7.1",
-  "com.typesafe" % "config" % "1.4.3",
-  "com.github.jwt-scala" %% "jwt-core" % "9.4.6",
-  "com.github.jwt-scala" %% "jwt-circe" % "9.4.6",
-  "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0",  // For password hashing
+  "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test
+)
+
+// =============================
+// ✅ Circe (JSON) Dependencies
+// =============================
+libraryDependencies ++= Seq(
+  "de.heikoseeberger" %% "akka-http-circe" % "1.39.2", // JSON support for Akka HTTP
+  "io.circe" %% "circe-generic" % CirceVersion,
+  "io.circe" %% "circe-parser" % CirceVersion
+)
+
+// =============================
+// ✅ Spray JSON (Keep this since you added it)
+// =============================
+libraryDependencies ++= Seq(
+  "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion
+)
+
+// =============================
+// ✅ Slick (Postgres) Dependencies
+// =============================
+libraryDependencies ++= Seq(
+  "com.typesafe.slick" %% "slick" % SlickVersion,
+  "com.typesafe.slick" %% "slick-hikaricp" % SlickVersion,
+  "org.postgresql" % "postgresql" % "42.7.1"
+)
+
+// =============================
+// ✅ JWT Authentication
+// =============================
+libraryDependencies ++= Seq(
+  "com.github.jwt-scala" %% "jwt-core" % JwtVersion,
+  "com.github.jwt-scala" %% "jwt-circe" % JwtVersion
+)
+
+// =============================
+// ✅ Password Hashing
+// =============================
+libraryDependencies += "com.github.t3hnar" %% "scala-bcrypt" % "4.3.0"
+
+// =============================
+// ✅ Config and Environment
+// =============================
+libraryDependencies ++= Seq(
+  "com.typesafe" % "config" % "1.4.3", // For application.conf
   "io.github.cdimascio" % "dotenv-java" % "2.3.2" // For loading .env files
+)
+
+// =============================
+// ✅ Testing Dependencies
+// =============================
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "3.2.18" % Test
 )
