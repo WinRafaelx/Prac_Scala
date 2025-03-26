@@ -1,6 +1,6 @@
 package services
 
-import api.models.{LoginRequest, LoginResponse, RegisterRequest, User}
+import domain.{LoginRequest, LoginResponse, RegisterRequest, User}
 import repositories.UserAuthRepositoryTrait
 import com.github.t3hnar.bcrypt._
 import scala.concurrent.{ExecutionContext, Future}

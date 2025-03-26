@@ -1,6 +1,6 @@
 package db
 
-import domain.{UserAuthTable}
+import api.models.{UserAuthTable}
 import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{ExecutionContext, Future}
 
