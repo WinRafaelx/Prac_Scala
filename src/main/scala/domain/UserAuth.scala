@@ -1,11 +1,10 @@
 package domain
 
 import slick.jdbc.PostgresProfile.api._
-import java.util.UUID
 import java.sql.Timestamp
 
 case class UserAuth(
-  id: UUID,
+  id: Int,
   email: String,
   phone: Option[String],
   passwordHash: String,
@@ -15,7 +14,7 @@ case class UserAuth(
 )
 
 class UserAuthTable(tag: Tag) extends Table[UserAuth](tag, "user_auth") {
-  def id = column[UUID]("id", O.PrimaryKey)
+  def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
   def email = column[String]("email", O.Unique)
   def phone = column[Option[String]]("phone", O.Unique)
   def passwordHash = column[String]("password_hash")
