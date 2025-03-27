@@ -1,6 +1,6 @@
 package services
 
-import api.models.{LoginRequest, LoginResponse, RegisterRequest, User}
+import domain.{LoginRequest, LoginResponse, RegisterRequest, User}
 import repositories.UserAuthRepositoryTrait
 import com.github.t3hnar.bcrypt._
 import scala.concurrent.{ExecutionContext, Future}
@@ -9,7 +9,7 @@ class AuthService(UserAuthRepository: UserAuthRepositoryTrait, jwtService: JwtSe
   
   def register(request: RegisterRequest)(implicit ec: ExecutionContext): Future[Either[String, (String, User)]] = {
     val hashedPassword = request.password.bcrypt
-    val newUser = User(None, request.name, request.email, hashedPassword)
+    val newUser = User(None, request.phone, request.email, hashedPassword)
     
     UserAuthRepository.createUser(newUser).map { createdUser =>
       val token = jwtService.createToken(createdUser.id, createdUser.email)

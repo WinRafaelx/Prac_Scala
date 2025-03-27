@@ -3,10 +3,10 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
-import api.routes.{AuthRoutes}
-import services.{JwtService, AuthService}
+import api.routes.{AuthRoutes, BookRoutes}
+import services.{JwtService, AuthService, BookService}
 import api.directives.AuthDirectives
-import repositories.UserAuthRepository
+import repositories.{UserAuthRepository, BookRepository}
 import db.DatabaseInitializer
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future, Await}
 import scala.concurrent.duration._
@@ -22,10 +22,12 @@ object Main {
     val jwtService = JwtService()
     val authService = AuthService(UserAuthRepository, jwtService)
     val authDirectives = AuthDirectives(authService)
+    val bookService = BookService(BookRepository)
     
     // Initialize routes
     val authRoutes = AuthRoutes(authService).routes
-    val combinedRoutes: Route = authRoutes
+    val bookRoutes = BookRoutes(bookService).routes
+    val combinedRoutes: Route = authRoutes ~ bookRoutes
     
     println("Initializing database...")
     Try {

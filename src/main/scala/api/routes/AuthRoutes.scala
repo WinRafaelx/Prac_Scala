@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.model.StatusCodes
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import api.models.{LoginRequest, LoginResponse, RegisterRequest}
+import domain.{LoginRequest, LoginResponse, RegisterRequest}
 import services.AuthService
 import scala.concurrent.ExecutionContext
 import scala.util.{Success, Failure}
