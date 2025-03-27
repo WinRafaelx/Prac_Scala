@@ -10,7 +10,7 @@ import java.time.Instant
 import domain.User
 
 object UserAuthRepository extends UserAuthRepositoryTrait {
-  private val users = UserAuthTable.table
+  private val users = UserAuthTable.query
   private val logger = LoggerFactory.getLogger(this.getClass)
 
   // Conversion between domain model and API model

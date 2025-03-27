@@ -26,5 +26,5 @@ class UserAuthTable(tag: Tag) extends Table[UserAuth](tag, "user_auth") {
 }
 
 object UserAuthTable {
-  val table = TableQuery[UserAuthTable]
+  val query = TableQuery[UserAuthTable]
 }

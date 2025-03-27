@@ -1,19 +1,21 @@
 package db
 
-import api.models.{UserAuthTable}
+import api.models.{UserAuthTable, BookTable}
 import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.{ExecutionContext, Future}
 
 object DatabaseInitializer {
   private val db = DatabaseConnection.db
-  private val users = UserAuthTable.table
+  private val users = UserAuthTable.query
+  private val books = BookTable.query
 
   /** Initialize database schemas */
   def initDatabase()(implicit ec: ExecutionContext): Future[Unit] = {
     println("Initializing database schemas...")
 
     val createSchemas = DBIO.seq(
-      users.schema.createIfNotExists
+      users.schema.createIfNotExists,
+      books.schema.createIfNotExists
     ).transactionally
 
     db.run(createSchemas)
